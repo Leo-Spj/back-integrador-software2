@@ -7,6 +7,7 @@ package utp.integrador.software2.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,7 @@ public class BookingServiceImpl implements BookingService {
             BookingItem bookingItem = BookingItem.builder()
                     .tourPackage(cartItem.getTourPackage())
                     .travelDateStart(cartItem.getTravelDateStart())
+                    .travelDateEnd(cartItem.getTravelDateEnd())
                     .numberOfTravelers(cartItem.getNumberOfTravelers())
                     .price(itemPrice)
                     .build();
@@ -56,6 +58,17 @@ public class BookingServiceImpl implements BookingService {
             totalPrice = totalPrice.add(itemPrice);
         }
 
+        // 📌 Tomar las fechas mínimas y máximas del carrito
+        LocalDate minStart = cart.stream()
+                .map(CartItem::getTravelDateStart)
+                .min(LocalDate::compareTo)
+                .orElseThrow();
+
+        LocalDate maxEnd = cart.stream()
+                .map(CartItem::getTravelDateEnd)
+                .max(LocalDate::compareTo)
+                .orElseThrow();
+
         Booking booking = Booking.builder()
                 .user(user)
                 .status("PENDING")
@@ -63,6 +76,8 @@ public class BookingServiceImpl implements BookingService {
                 .createdAt(LocalDateTime.now())
                 .items(bookingItems)
                 .totalPrice(totalPrice)
+                .travelDateStart(minStart) // se asigna fecha mínima
+                .travelDateEnd(maxEnd) // se asigna fecha máxima
                 .build();
 
         // Asignar la reserva a cada BookingItem

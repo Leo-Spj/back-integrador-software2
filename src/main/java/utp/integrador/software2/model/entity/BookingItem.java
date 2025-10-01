@@ -40,6 +40,7 @@ public class BookingItem {
     private TourPackage tourPackage;
 
     private LocalDate travelDateStart;
+    private LocalDate travelDateEnd;
     private int numberOfTravelers;
     private BigDecimal price;
 }

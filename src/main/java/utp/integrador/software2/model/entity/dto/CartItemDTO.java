@@ -7,5 +7,5 @@ package utp.integrador.software2.model.entity.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record CartItemDTO(Long id, Long tourPackageId, String tourPackageTitle, LocalDate travelDateStart, int numberOfTravelers, BigDecimal price) {}
+public record CartItemDTO(Long id, Long tourPackageId, String tourPackageTitle, LocalDate travelDateStart, LocalDate travelDateEnd, int numberOfTravelers, BigDecimal price) {}
 

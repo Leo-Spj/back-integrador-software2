@@ -37,6 +37,7 @@ public class CartServiceImpl implements CartService{
         item.setUser(user);
         item.setTourPackage(tour);
         item.setTravelDateStart(request.travelDateStart());
+        item.setTravelDateEnd(request.travelDateEnd());
         item.setNumberOfTravelers(request.numberOfTravelers());
         item.setCreatedAt(LocalDateTime.now());
         return cartItemRepository.save(item);

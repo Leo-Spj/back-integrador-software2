@@ -42,4 +42,6 @@ public class CartItem {
     private int numberOfTravelers;
 
     private LocalDateTime createdAt;
+
+    private LocalDate travelDateEnd;
 }

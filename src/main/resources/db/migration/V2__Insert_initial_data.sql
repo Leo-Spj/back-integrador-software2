@@ -44,9 +44,9 @@ INSERT INTO tour_packages (title, description, itinerary, base_price, duration_d
 ('Aventura en Arequipa', 'Excursión a volcanes y cañones...', 'Día 1: City tour... Día 2: Trekking al Colca...', 750.00, 3, 2, 'https://example.com/images/arequipa.jpg', 3, 1);
 
 -- Cart Items de prueba para el usuario
-INSERT INTO cart_items (user_id, tour_package_id, travel_date_start, number_of_travelers, created_at) VALUES
-(1, 1, '2025-10-10', 2, NOW()),
-(1, 2, '2025-10-15', 1, NOW());
+INSERT INTO cart_items (user_id, tour_package_id, travel_date_start, travel_date_end, number_of_travelers, created_at) VALUES
+(1, 1, '2025-10-10', '2025-10-15', 2, NOW()),
+(1, 2, '2025-10-15', '2025-10-20', 1, NOW());
 
 
 INSERT INTO bookings (user_id, travel_date_start, travel_date_end, number_of_travelers, total_price, status, booking_reference, created_at
@@ -54,8 +54,8 @@ INSERT INTO bookings (user_id, travel_date_start, travel_date_end, number_of_tra
 
 
 -- Booking Items asociados
-INSERT INTO booking_items (booking_id, tour_package_id, travel_date_start, number_of_travelers, price, created_at) VALUES
-(1, 1, '2025-09-20', 2, 1700.00, NOW());
+INSERT INTO booking_items (booking_id, tour_package_id, travel_date_start, travel_date_end, number_of_travelers, price, created_at) VALUES
+(1, 1, '2025-09-20', '2025-09-25', 2, 1700.00, NOW());
 
 -- Insertar algunos paquetes turísticos de ejemplo (requiere que existan regiones y categorías)
 -- INSERT INTO tour_packages (title, description, itinerary, base_price, duration_days, duration_nights, main_image_url, region_id, category_id) VALUES

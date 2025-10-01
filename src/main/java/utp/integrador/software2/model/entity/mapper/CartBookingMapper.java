@@ -23,6 +23,7 @@ public class CartBookingMapper {
             item.getTourPackage().getId(),
             item.getTourPackage().getTitle(),
             item.getTravelDateStart(),
+            item.getTravelDateEnd(),
             item.getNumberOfTravelers(),
             item.getTourPackage().getBasePrice()
                 .multiply(BigDecimal.valueOf(item.getNumberOfTravelers()))
@@ -40,6 +41,7 @@ public class CartBookingMapper {
             item.getTourPackage().getId(),
             item.getTourPackage().getTitle(),
             item.getTravelDateStart(),
+            item.getTravelDateEnd(),
             item.getNumberOfTravelers(),
             item.getPrice()
         );

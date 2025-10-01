@@ -6,5 +6,5 @@ package utp.integrador.software2.model.entity.dto;
 
 import java.time.LocalDate;
 
-public record AddCartItemRequest(Long tourPackageId, LocalDate travelDateStart, int numberOfTravelers) {}
+public record AddCartItemRequest(Long tourPackageId, LocalDate travelDateStart, LocalDate travelDateEnd, int numberOfTravelers) {}
 
