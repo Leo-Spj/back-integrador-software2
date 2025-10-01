@@ -4,17 +4,18 @@
  */
 package utp.integrador.software2.service;
 
-import java.util.List;
-import utp.integrador.software2.model.entity.dto.UserCreateDTO;
-import utp.integrador.software2.model.entity.dto.UserDTO;
+import java.util.Optional;
+import org.springframework.security.core.userdetails.UserDetails;
+import utp.integrador.software2.model.entity.User;
+import utp.integrador.software2.model.entity.dto.LoginRequest;
+import utp.integrador.software2.model.entity.dto.RegisterRequest;
+import utp.integrador.software2.model.entity.dto.UserUpdate;
 
-/**
- *
- * @author Joacs
- */
 public interface UserService {
-    public List<UserDTO> getAllUsers();
-    public UserDTO getUserById(Long id);
-    public UserDTO createUser(UserCreateDTO dto);
-    public void deleteUser(Long id);
+    public User register(RegisterRequest request);
+    public String login(LoginRequest request);
+    public Optional<User> getProfile(String email);
+    public User updateProfile(String email, UserUpdate update);
+    public User subscribePremium(String email);
+    public UserDetails loadUserByUsername(String email);
 }

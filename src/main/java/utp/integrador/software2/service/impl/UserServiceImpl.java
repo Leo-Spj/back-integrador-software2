@@ -4,14 +4,17 @@
  */
 package utp.integrador.software2.service.impl;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.Collections;
+import java.util.Optional;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import utp.integrador.software2.exception.UserNotFoundException;
+import utp.integrador.software2.config.JwtUtil;
 import utp.integrador.software2.model.entity.User;
-import utp.integrador.software2.model.entity.dto.UserCreateDTO;
-import utp.integrador.software2.model.entity.dto.UserDTO;
+import utp.integrador.software2.model.entity.dto.LoginRequest;
+import utp.integrador.software2.model.entity.dto.RegisterRequest;
+import utp.integrador.software2.model.entity.dto.UserUpdate;
 import utp.integrador.software2.repository.UserRepository;
 import utp.integrador.software2.service.UserService;
 
@@ -19,72 +22,62 @@ import utp.integrador.software2.service.UserService;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
-    @Override
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(u -> UserDTO.builder()
-                        .id(u.getId())
-                        .fullName(u.getFullName())
-                        .email(u.getEmail())
-                        .phone(u.getPhone())
-                        .isPremium(u.isPremium())
-                        .pointsBalance(u.getPointsBalance())
-                        .build()
-                )
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public UserDTO getUserById(Long id) {
-        User u = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con id: " + id));
-
-        return UserDTO.builder()
-                .id(u.getId())
-                .fullName(u.getFullName())
-                .email(u.getEmail())
-                .phone(u.getPhone())
-                .isPremium(u.isPremium())
-                .pointsBalance(u.getPointsBalance())
-                .build();
-    }
-
-    @Override
-    public UserDTO createUser(UserCreateDTO dto) {
+    public User register(RegisterRequest request) {
         User user = User.builder()
-                .fullName(dto.getFullName())
-                .email(dto.getEmail())
-                .passwordHash(passwordEncoder.encode(dto.getPassword()))
-                .phone(dto.getPhone())
+                .fullName(request.fullName())
+                .email(request.email())
+                .passwordHash(passwordEncoder.encode(request.password()))
+                .phone(request.phone())
                 .isPremium(false)
-                .pointsBalance(0)
                 .build();
-
-        User saved = userRepository.save(user);
-
-        return UserDTO.builder()
-                .id(saved.getId())
-                .fullName(saved.getFullName())
-                .email(saved.getEmail())
-                .phone(saved.getPhone())
-                .isPremium(saved.isPremium())
-                .pointsBalance(saved.getPointsBalance())
-                .build();
+        return userRepository.save(user);
     }
 
-    @Override
-    public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException("Usuario no encontrado con id: " + id);
+    public String login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            throw new RuntimeException("Credenciales inválidas");
         }
-        userRepository.deleteById(id);
+        return jwtUtil.generateToken(user.getEmail());
+    }
+
+    public Optional<User> getProfile(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public User updateProfile(String email, UserUpdate update) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+        user.setFullName(update.fullName());
+        user.setPhone(update.phone());
+        return userRepository.save(user);
+    }
+
+    public User subscribePremium(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+        user.setPremium(true);
+        return userRepository.save(user);
+    }
+    
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
+
+        // Aquí conviertes tu entidad a un objeto que Spring Security pueda manejar
+        return org.springframework.security.core.userdetails.User.builder()
+            .username(user.getEmail())           // el "username" será tu email
+            .password(user.getPasswordHash())    // tu contraseña encriptada
+            .authorities(Collections.emptyList()) // o tus roles si tienes
+            .build();
     }
 }

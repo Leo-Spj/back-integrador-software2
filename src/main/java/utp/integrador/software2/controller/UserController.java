@@ -4,17 +4,15 @@
  */
 package utp.integrador.software2.controller;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import java.util.List;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import utp.integrador.software2.model.entity.dto.UserCreateDTO;
-import utp.integrador.software2.model.entity.dto.UserDTO;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import utp.integrador.software2.config.JwtUtil;
+import utp.integrador.software2.model.entity.User;
+import utp.integrador.software2.model.entity.dto.AuthResponse;
+import utp.integrador.software2.model.entity.dto.LoginRequest;
+import utp.integrador.software2.model.entity.dto.RegisterRequest;
+import utp.integrador.software2.model.entity.dto.UserResponse;
+import utp.integrador.software2.model.entity.dto.UserUpdate;
 import utp.integrador.software2.service.UserService;
 
 @RestController
@@ -22,26 +20,40 @@ import utp.integrador.software2.service.UserService;
 public class UserController {
 
     private final UserService userService;
-    public UserController(UserService userService) { this.userService = userService; }
+    private final JwtUtil jwtUtil;
 
-    @GetMapping
-    public List<UserDTO> getAllUsers() {
-        return userService.getAllUsers();
+    public UserController(UserService userService, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    @PostMapping("/auth/register")
+    public UserResponse register(@RequestBody RegisterRequest request) {
+        User user = userService.register(request);
+        return new UserResponse(user.getId(), user.getFullName(), user.getEmail(), user.getPhone(), user.isPremium());
     }
 
-    @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO dto) {
-        return ResponseEntity.ok(userService.createUser(dto));
+    @PostMapping("/auth/login")
+    public AuthResponse login(@RequestBody LoginRequest request) {
+        String token = userService.login(request);
+        return new AuthResponse(token);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/user/profile")
+    public UserResponse profile(Authentication auth) {
+        User user = userService.getProfile(auth.getName()).orElseThrow();
+        return new UserResponse(user.getId(), user.getFullName(), user.getEmail(), user.getPhone(), user.isPremium());
+    }
+
+    @PutMapping("/user/profile")
+    public UserUpdate updateProfile(Authentication auth, @RequestBody UserUpdate update) {
+        User user = userService.updateProfile(auth.getName(), update);
+        return new UserUpdate(user.getId(), user.getFullName(), user.getEmail(), user.getPhone());
+    }
+
+    @PostMapping("/user/subscribe-premium")
+    public UserResponse subscribePremium(Authentication auth) {
+        User user = userService.subscribePremium(auth.getName());
+        return new UserResponse(user.getId(), user.getFullName(), user.getEmail(), user.getPhone(), user.isPremium());
     }
 }
