@@ -1,5 +1,6 @@
 # Para Ingresar a Swagger
 - http://localhost:8080/swagger-ui.html
+- http://localhost:8080/swagger-ui/index.html
 
 # Configuraciones en el properties
 - spring.flyway.enabled=true
