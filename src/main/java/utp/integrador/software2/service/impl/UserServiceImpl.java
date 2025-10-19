@@ -75,9 +75,9 @@ public class UserServiceImpl implements UserService {
 
         // Aquí conviertes tu entidad a un objeto que Spring Security pueda manejar
         return org.springframework.security.core.userdetails.User.builder()
-            .username(user.getEmail())           // el "username" será tu email
-            .password(user.getPasswordHash())    // tu contraseña encriptada
-            .authorities(Collections.emptyList()) // o tus roles si tienes
+            .username(user.getEmail())        
+            .password(user.getPasswordHash()) 
+            .authorities(Collections.emptyList())
             .build();
     }
 }
